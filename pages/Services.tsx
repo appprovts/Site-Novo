@@ -8,51 +8,87 @@ const Services: React.FC = () => {
     {
       icon: Factory,
       title: "Consultoria Grupo A",
-      desc: "Análise estratégica de faturas de alta tensão, ajuste de demanda contratada e migração para o Mercado Livre de Energia (ACL).",
+      desc: "Análise estratégica de faturas de alta tensão para máxima eficiência financeira.",
       tags: ["Indústria", "Grandes Comércios", "Agronegócio"],
-      link: "/group-a"
+      link: "/group-a",
+      features: [
+        "Estudo de Modalidade Tarifária (Verde vs Azul)",
+        "Correção de Fator de Potência (Energia Reativa)",
+        "Ajuste de Demanda Contratada",
+        "Migração para Mercado Livre (ACL)"
+      ]
     },
     {
       icon: Zap,
       title: "Usinas Fotovoltaicas",
-      desc: "Projetos turn-key de alta performance. Da simulação de viabilidade técnica à homologação final com a concessionária.",
+      desc: "Projetos turn-key de alta performance. Da simulação à homologação.",
       tags: ["Residencial Premium", "Industrial", "Comercial"],
-      link: "/calculator"
+      link: "/calculator",
+      features: [
+        "Projetos Executivos em 3D",
+        "Homologação em todas as concessionárias",
+        "Instalação com equipe própria e certificada"
+      ]
     },
     {
       icon: Settings,
       title: "Operação e Manutenção (O&M)",
-      desc: "Monitoramento ativo via software, limpeza técnica de módulos e manutenção preventiva para garantir 100% de performance.",
+      desc: "Garanta 100% de performance do seu ativo solar por 25 anos.",
       tags: ["Pós-Venda", "Monitoramento IA", "Preventiva"],
-      link: "/app"
+      link: "/app",
+      features: [
+        "Monitoramento Ativo 24/7 via App",
+        "Limpeza Técnica de Módulos",
+        "Manutenção Preventiva e Corretiva"
+      ]
     },
     {
       icon: Search,
       title: "Auditoria Energética",
-      desc: "Laudos técnicos de eficiência, termografia infravermelha e identificação de fugas de corrente para redução imediata de custos.",
+      desc: "Laudos técnicos para identificação de desperdícios e riscos elétricos.",
       tags: ["Laudos", "Engenharia Diagnóstica", "Eficiência"],
-      link: "/contact"
+      link: "/contact",
+      features: [
+        "Termografia Infravermelha",
+        "Análise de Qualidade de Energia (Prodist)",
+        "Laudos de Aterramento e SPDA"
+      ]
     },
     {
       icon: Unplug,
       title: "Grid Zero",
-      desc: "Sistemas de injeção zero na rede elétrica. Gere sua própria energia para consumo instantâneo sem necessidade de homologação complexa ou taxas de fio B.",
+      desc: "Gere energia sem injetar na rede. ideal para evitar taxas de fio B.",
       tags: ["Homologação", "Autoconsumo", "Zero Export"],
-      link: "/contact"
+      link: "/contact",
+      features: [
+        "Inversores com Limitador de Exportação",
+        "Autoconsumo Instantâneo",
+        "Sem taxas de disponibilidade ou Fio B"
+      ]
     },
     {
       icon: PlugZap,
       title: "Sistemas Híbridos",
-      desc: "A revolução da autonomia. Combine a economia do On-Grid com a segurança do Off-Grid, garantindo energia mesmo durante apagões da concessionária.",
+      desc: "Segurança energética total. Energia solar com backup de baterias.",
       tags: ["Backup de Energia", "Segurança", "Autonomia"],
-      link: "/contact"
+      link: "/contact",
+      features: [
+        "Baterias de Lítio (LFP) de Alta Vida Útil",
+        "Sistema Anti-Apagão (No-Break Solar)",
+        "Gestão Inteligente de Cargas"
+      ]
     },
     {
       icon: Battery,
       title: "Soluções BESS",
-      desc: "Battery Energy Storage Systems para Comércios e Indústrias. Reduza custos com Peak Shaving (Corte de Ponta) e proteja equipamentos sensíveis.",
+      desc: "Armazenamento em larga escala para indústrias. Reduza custos de ponta.",
       tags: ["Indústria 4.0", "Peak Shaving", "Armazenamento"],
-      link: "/group-a"
+      link: "/group-a",
+      features: [
+        "Peak Shaving (Corte de Ponta)",
+        "Time Shifting (Arbitragem Tarifária)",
+        "Estabilidade de Tensão e Frequência"
+      ]
     }
   ];
 
@@ -66,26 +102,40 @@ const Services: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, idx) => (
-            <div key={idx} className="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl transition-all group">
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="w-16 h-16 bg-vts-petrol rounded-2xl flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <service.icon size={32} />
+            <div key={idx} className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-vts-petrol rounded-2xl flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                  <service.icon size={28} />
                 </div>
                 <div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {service.tags.map(tag => (
-                      <span key={tag} className="text-[10px] font-bold uppercase tracking-widest bg-vts-light px-2 py-1 rounded text-vts-petrol border border-slate-200">{tag}</span>
-                    ))}
-                  </div>
-                  <h3 className="text-2xl font-bold text-vts-dark mb-4">{service.title}</h3>
-                  <p className="text-slate-600 leading-relaxed mb-6">{service.desc}</p>
-                  <Link to={service.link} className="inline-flex items-center gap-2 text-vts-orange font-bold hover:gap-4 transition-all">
-                    Saiba mais <ArrowRight size={18} />
-                  </Link>
+                  <h3 className="text-xl font-bold text-vts-dark leading-tight">{service.title}</h3>
                 </div>
               </div>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {service.tags.map(tag => (
+                  <span key={tag} className="text-[9px] font-bold uppercase tracking-widest bg-vts-light px-2 py-1 rounded text-vts-petrol border border-slate-200">{tag}</span>
+                ))}
+              </div>
+
+              <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">{service.desc}</p>
+
+              {service.features && (
+                <ul className="space-y-2 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  {service.features.map((feature, fIdx) => (
+                    <li key={fIdx} className="text-xs font-medium text-slate-700 flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-vts-orange mt-1.5 shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <Link to={service.link} className="inline-flex items-center gap-2 text-vts-orange font-bold text-sm hover:gap-3 transition-all mt-auto">
+                Saiba mais <ArrowRight size={16} />
+              </Link>
             </div>
           ))}
         </div>
