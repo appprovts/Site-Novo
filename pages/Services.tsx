@@ -1,7 +1,58 @@
-
 import React from 'react';
 import { Factory, Home, Settings, Search, Zap, BarChart3, ArrowRight, Unplug, PlugZap, Battery } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+const ServiceCard = ({ service }: { service: any }) => {
+  const [showDetails, setShowDetails] = React.useState(false);
+
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl transition-all group flex flex-col h-full">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-14 h-14 bg-vts-petrol rounded-2xl flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+          <service.icon size={28} />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-vts-dark leading-tight">{service.title}</h3>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {service.tags.map((tag: string) => (
+          <span key={tag} className="text-[9px] font-bold uppercase tracking-widest bg-vts-light px-2 py-1 rounded text-vts-petrol border border-slate-200">{tag}</span>
+        ))}
+      </div>
+
+      <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">{service.desc}</p>
+
+      {service.features && (
+        <div className="mb-6">
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="text-xs font-bold text-slate-500 hover:text-vts-orange flex items-center gap-1 transition-colors outline-none"
+          >
+            {showDetails ? 'Ocultar Detalhes' : 'Ver Detalhes Técnicos'}
+            <ArrowRight size={12} className={`transition-transform ${showDetails ? 'rotate-90' : ''}`} />
+          </button>
+
+          {showDetails && (
+            <ul className="mt-4 space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100 animate-fade-in">
+              {service.features.map((feature: string, fIdx: number) => (
+                <li key={fIdx} className="text-xs font-medium text-slate-700 flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-vts-orange mt-1.5 shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      <Link to={service.link} className="inline-flex items-center gap-2 text-vts-orange font-bold text-sm hover:gap-3 transition-all mt-auto pt-4 border-t border-slate-50">
+        Saiba mais <ArrowRight size={16} />
+      </Link>
+    </div>
+  );
+};
 
 const Services: React.FC = () => {
   const services = [
@@ -104,39 +155,7 @@ const Services: React.FC = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl transition-all group flex flex-col">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-vts-petrol rounded-2xl flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <service.icon size={28} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-vts-dark leading-tight">{service.title}</h3>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {service.tags.map(tag => (
-                  <span key={tag} className="text-[9px] font-bold uppercase tracking-widest bg-vts-light px-2 py-1 rounded text-vts-petrol border border-slate-200">{tag}</span>
-                ))}
-              </div>
-
-              <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">{service.desc}</p>
-
-              {service.features && (
-                <ul className="space-y-2 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  {service.features.map((feature, fIdx) => (
-                    <li key={fIdx} className="text-xs font-medium text-slate-700 flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-vts-orange mt-1.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <Link to={service.link} className="inline-flex items-center gap-2 text-vts-orange font-bold text-sm hover:gap-3 transition-all mt-auto">
-                Saiba mais <ArrowRight size={16} />
-              </Link>
-            </div>
+            <ServiceCard key={idx} service={service} />
           ))}
         </div>
 
