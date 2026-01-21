@@ -38,7 +38,7 @@ const Hero = () => {
             Transforme Sol em <span className="text-transparent bg-clip-text bg-gradient-to-r from-vts-orange to-yellow-400">Ativos Financeiros</span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-300 mb-8 font-light leading-relaxed">
-            Solicite uma consultoria personalizada e descubra quanto você pode lucrar economizando com tecnologiaVTS.
+            Solicite uma consultoria personalizada e descubra quanto você pode lucrar economizando com tecnologia VTS.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link to="/calculator" className="flex items-center justify-center gap-2 bg-vts-orange hover:bg-vts-orangeHover text-white px-8 py-4 rounded-lg text-lg font-bold transition-all shadow-lg shadow-vts-orange/20 transform hover:-translate-y-1">
