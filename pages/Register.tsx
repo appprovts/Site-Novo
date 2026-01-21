@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, FileText, ArrowRight, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../services/supabase';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -69,11 +70,11 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'cnpj') {
       const formatted = formatCNPJ(value);
       setFormData(prev => ({ ...prev, [name]: formatted }));
-      
+
       // Limpa erro se estiver corrigindo
       if (errors.cnpj) setErrors(prev => ({ ...prev, cnpj: '' }));
     } else {
@@ -84,10 +85,10 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     // Validações
     const newErrors: Record<string, string> = {};
-    
+
     if (!validateCNPJ(formData.cnpj)) {
       newErrors.cnpj = 'CNPJ inválido. Verifique os números digitados.';
     }
@@ -105,13 +106,33 @@ const Register: React.FC = () => {
       return;
     }
 
-    // Simulação de Envio
+    // Integração com Supabase
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            cnpj: formData.cnpj,
+            user_type: 'INTEGRATOR' // Definindo tipo padrão
+          }
+        }
+      });
+
+      if (signUpError) throw signUpError;
+
       setSuccess(true);
-      // Aqui você integraria com o backend
-    }, 1500);
+    } catch (err: any) {
+      console.error('Erro no cadastro:', err);
+      setErrors(prev => ({
+        ...prev,
+        submit: err.message || 'Erro ao realizar cadastro. Tente novamente.'
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (success) {
@@ -123,7 +144,7 @@ const Register: React.FC = () => {
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Cadastro Solicitado!</h2>
           <p className="text-slate-600 mb-6">
-            Recebemos seus dados empresariais. Nossa equipe de homologação validará seu CNPJ e liberará o acesso Pro em até 24h.
+            Recebemos seus dados empresariais. Verifique seu e-mail para confirmar o cadastro. Após a confirmação, nossa equipe de homologação validará seu CNPJ.
           </p>
           <Link to="/" className="inline-block bg-vts-petrol text-white px-6 py-3 rounded-xl font-bold hover:bg-vts-dark transition-colors">
             Voltar para Home
@@ -151,7 +172,7 @@ const Register: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              
+
               {/* Nome */}
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Razão Social ou Nome</label>
@@ -261,7 +282,7 @@ const Register: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         <p className="text-center text-slate-500 text-xs mt-6">
           Ao se cadastrar, você concorda com os Termos de Uso e Política de Privacidade da VTS Engenharia.
         </p>
