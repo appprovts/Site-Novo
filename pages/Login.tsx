@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, LogIn, ShieldCheck, AlertCircle, Loader2, Globe } from 'lucide-react';
 import { supabase } from '../services/supabase';
+import { Mail, Lock, ArrowRight, LogIn, ShieldCheck, AlertCircle, Loader2, Globe } from 'lucide-react';
+
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -28,24 +29,24 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     setError(null);
 
+    // Integração com Supabase
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
+        password: formData.password
       });
 
-      if (error) {
-        throw error;
-      }
+      if (authError) throw authError;
 
-      if (data.session) {
-        navigate('/app');
-      }
+      navigate('/app');
     } catch (err: any) {
-      setError(err.message || 'Erro ao realizar login. Verifique suas credenciais.');
+      console.error('Login error:', err);
+      setError('Falha na autenticação. Verifique seu e-mail e senha.');
+    } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="pt-32 pb-20 min-h-screen bg-vts-dark relative overflow-hidden flex items-center justify-center px-4">

@@ -106,27 +106,31 @@ const Register: React.FC = () => {
       return;
     }
 
+    // Integração com Supabase
     setIsSubmitting(true);
-
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             full_name: formData.name,
             cnpj: formData.cnpj,
+            user_type: 'INTEGRATOR'
           }
         }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (signUpError) throw signUpError;
 
       setSuccess(true);
     } catch (err: any) {
-      setErrors({ form: err.message || 'Erro ao realizar cadastro.' });
+      console.error('Erro no cadastro:', err);
+      setErrors(prev => ({
+        ...prev,
+        submit: err.message || 'Erro ao realizar cadastro. Tente novamente.'
+      }));
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -140,7 +144,7 @@ const Register: React.FC = () => {
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Cadastro Solicitado!</h2>
           <p className="text-slate-600 mb-6">
-            Recebemos seus dados empresariais. Nossa equipe de homologação validará seu CNPJ e liberará o acesso Pro em até 24h.
+            Recebemos seus dados empresariais. Verifique seu e-mail para confirmar o cadastro. Após a confirmação, nossa equipe de homologação validará seu CNPJ.
           </p>
           <Link to="/" className="inline-block bg-vts-petrol text-white px-6 py-3 rounded-xl font-bold hover:bg-vts-dark transition-colors">
             Voltar para Home
