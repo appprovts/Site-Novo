@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, LogIn, ShieldCheck, AlertCircle, Loader2, Globe } from 'lucide-react';
+import { supabase } from '../services/supabase';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -27,15 +28,23 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     setError(null);
 
-    // Simulação de autenticação
-    setTimeout(() => {
-      if (formData.email === 'demo@vts.com' && formData.password === '123456') {
-        navigate('/app');
-      } else {
-        setError('Credenciais inválidas. Verifique seu e-mail corporativo e senha.');
-        setIsSubmitting(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        throw error;
       }
-    }, 1500);
+
+      if (data.session) {
+        navigate('/app');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Erro ao realizar login. Verifique suas credenciais.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,7 +59,7 @@ const Login: React.FC = () => {
         <div className="text-center mb-8 animate-fade-in">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
             <div className="w-12 h-12 bg-gradient-to-br from-vts-petrol to-teal-900 rounded-2xl flex items-center justify-center shadow-2xl border border-white/10 group-hover:scale-110 transition-transform">
-                <span className="text-white font-black text-lg tracking-tighter leading-none">VTS</span>
+              <span className="text-white font-black text-lg tracking-tighter leading-none">VTS</span>
             </div>
           </Link>
           <h1 className="text-3xl font-bold text-white tracking-tight">Portal do Membro</h1>
@@ -60,7 +69,7 @@ const Login: React.FC = () => {
         <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/10">
           <div className="p-8 md:p-10">
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {error && (
                 <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-start gap-3 animate-fade-in">
                   <AlertCircle className="text-red-500 shrink-0" size={18} />
@@ -121,7 +130,7 @@ const Login: React.FC = () => {
                     <div className="w-5 h-5 border-2 border-slate-200 rounded-md bg-white peer-checked:bg-vts-petrol peer-checked:border-vts-petrol transition-all"></div>
                     <div className="absolute inset-0 flex items-center justify-center text-white scale-0 peer-checked:scale-100 transition-transform">
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                   </div>
@@ -151,10 +160,10 @@ const Login: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <button type="button" className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-bold text-slate-700">
-                    <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" /> Google
+                  <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" /> Google
                 </button>
                 <button type="button" className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-bold text-slate-700">
-                    <img src="https://www.linkedin.com/favicon.ico" className="w-4 h-4" alt="LinkedIn" /> LinkedIn
+                  <img src="https://www.linkedin.com/favicon.ico" className="w-4 h-4" alt="LinkedIn" /> LinkedIn
                 </button>
               </div>
             </form>
@@ -165,19 +174,19 @@ const Login: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="mt-10 flex flex-col items-center gap-4 animate-fade-in delay-300">
-            <div className="flex items-center gap-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                <a href="#" className="hover:text-vts-lightPetrol transition-colors">Termos</a>
-                <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                <a href="#" className="hover:text-vts-lightPetrol transition-colors">Privacidade</a>
-                <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                <a href="#" className="hover:text-vts-lightPetrol transition-colors">Ajuda</a>
-            </div>
-            <div className="flex items-center gap-2 text-slate-600 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <ShieldCheck size={14} className="text-vts-lightPetrol" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Acesso Seguro SSL 256-bit</span>
-            </div>
+          <div className="flex items-center gap-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <a href="#" className="hover:text-vts-lightPetrol transition-colors">Termos</a>
+            <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
+            <a href="#" className="hover:text-vts-lightPetrol transition-colors">Privacidade</a>
+            <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
+            <a href="#" className="hover:text-vts-lightPetrol transition-colors">Ajuda</a>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+            <ShieldCheck size={14} className="text-vts-lightPetrol" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Acesso Seguro SSL 256-bit</span>
+          </div>
         </div>
       </div>
     </div>

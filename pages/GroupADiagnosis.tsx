@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { FileText, Upload, CheckCircle2, Factory, ArrowRight, Activity, AlertTriangle, X, Check, Loader2, MessageCircle } from 'lucide-react';
 import { diagnoseGroupA } from '../services/geminiService';
+import { supabase } from '../services/supabase';
 
 const GroupADiagnosis: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -13,7 +14,8 @@ const GroupADiagnosis: React.FC = () => {
     });
     const [analysis, setAnalysis] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    
+    const [isSavingLead, setIsSavingLead] = useState(false);
+
     // Upload & Modal States
     const [dragActive, setDragActive] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -82,17 +84,38 @@ const GroupADiagnosis: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         const aiResult = await diagnoseGroupA(
-            Number(formData.demand), 
-            Number(formData.peakConsumption), 
+            Number(formData.demand),
+            Number(formData.peakConsumption),
             Number(formData.offPeakConsumption)
         );
-        
+
         setAnalysis(aiResult);
         setStep(2);
         setLoading(false);
     };
 
-    const handleConsultancyRequest = () => {
+    const handleConsultancyRequest = async () => {
+        setIsSavingLead(true);
+        try {
+            await supabase
+                .from('leads')
+                .insert([
+                    {
+                        name: formData.company,
+                        phone: formData.cnpj, // Using cnpj as unique ID/phone if not provided
+                        type: 'group_a',
+                        simulation_data: {
+                            demand: formData.demand,
+                            peakConsumption: formData.peakConsumption,
+                            offPeakConsumption: formData.offPeakConsumption,
+                            analysis: analysis
+                        }
+                    }
+                ]);
+        } catch (err) {
+            console.error('Error saving group_a lead:', err);
+        }
+
         const message = `Olá, VTS! Fiz o pré-diagnóstico Grupo A no site.
 🏢 *Empresa:* ${formData.company}
 ⚡ *Demanda:* ${formData.demand} kW
@@ -100,14 +123,15 @@ const GroupADiagnosis: React.FC = () => {
 📉 *Consumo F. Ponta:* ${formData.offPeakConsumption} kWh
 
 O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consultoria gratuita.`;
-        
+
         const phoneNumber = '5586999199443';
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        setIsSavingLead(false);
     };
 
     return (
         <div className="pt-24 pb-20 bg-slate-50 min-h-screen relative">
-            
+
             {/* Modal de Confirmação Grupo A */}
             {showConfirmModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -121,13 +145,13 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                             Para garantir a precisão da análise, confirme se a fatura enviada pertence ao <strong>Grupo A (Alta Tensão)</strong>.
                         </p>
                         <div className="flex gap-3">
-                            <button 
+                            <button
                                 onClick={() => setShowConfirmModal(false)}
                                 className="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors"
                             >
                                 Cancelar
                             </button>
-                            <button 
+                            <button
                                 onClick={confirmGroupAUpload}
                                 className="flex-1 py-3 bg-vts-petrol hover:bg-vts-dark text-white rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
                             >
@@ -149,7 +173,7 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                     <div className="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300">
                         <div className="bg-vts-dark p-6 md:p-10 text-white flex justify-between items-center">
                             <div>
-                                <h2 className="text-2xl font-bold flex items-center gap-3"><Factory className="text-vts-orange"/> Dados da Unidade</h2>
+                                <h2 className="text-2xl font-bold flex items-center gap-3"><Factory className="text-vts-orange" /> Dados da Unidade</h2>
                                 <p className="text-slate-400 mt-2 text-sm">Insira os dados ou faça upload da fatura (PDF/Imagem).</p>
                             </div>
                             <div className="hidden md:block">
@@ -160,7 +184,7 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                         </div>
 
                         {/* Upload Zone */}
-                        <div 
+                        <div
                             className={`mx-8 mt-8 border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${dragActive ? 'border-vts-orange bg-orange-50' : 'border-slate-200 hover:border-vts-petrol hover:bg-slate-50'}`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -168,14 +192,14 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            <input 
+                            <input
                                 ref={fileInputRef}
-                                type="file" 
-                                className="hidden" 
-                                accept=".pdf,image/*" 
-                                onChange={handleChange} 
+                                type="file"
+                                className="hidden"
+                                accept=".pdf,image/*"
+                                onChange={handleChange}
                             />
-                            
+
                             {isExtracting ? (
                                 <div className="flex flex-col items-center">
                                     <Loader2 className="animate-spin text-vts-petrol mb-3" size={32} />
@@ -228,7 +252,7 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                                     {loading ? (
                                         <><Loader2 className="animate-spin" /> Gerando Relatório de Engenharia...</>
                                     ) : (
-                                        <>Gerar Diagnóstico Completo <ArrowRight size={20}/></>
+                                        <>Gerar Diagnóstico Completo <ArrowRight size={20} /></>
                                     )}
                                 </button>
                             </div>
@@ -251,17 +275,17 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                         <div className="grid md:grid-cols-2 gap-8 mb-8">
                             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
                                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                    <Activity size={18} className="text-vts-orange"/> Potencial Identificado
+                                    <Activity size={18} className="text-vts-orange" /> Potencial Identificado
                                 </h3>
                                 <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                                    Baseado nos dados extraídos, sua unidade apresenta perfil compatível com sistema de geração distribuída de <strong>{Math.round(Number(formData.offPeakConsumption)/115)} kWp</strong>.
+                                    Baseado nos dados extraídos, sua unidade apresenta perfil compatível com sistema de geração distribuída de <strong>{Math.round(Number(formData.offPeakConsumption) / 115)} kWp</strong>.
                                 </p>
                                 <div className="mt-4 p-3 bg-white rounded border border-slate-200 text-xs text-slate-500">
                                     <p><strong>Demanda Atual:</strong> {formData.demand} kW</p>
                                     <p><strong>Fator de Carga:</strong> {(Number(formData.offPeakConsumption) / (Number(formData.demand) * 730)).toFixed(2)} (Estimado)</p>
                                 </div>
                             </div>
-                             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 relative overflow-hidden">
+                            <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-bl-full opacity-50"></div>
                                 <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
                                     <Factory size={18} /> Recomendação Técnica VTS
@@ -273,18 +297,25 @@ O sistema sugeriu oportunidades de economia. Gostaria de solicitar minha consult
                         </div>
 
                         <div className="text-center bg-vts-dark text-white p-10 rounded-2xl relative overflow-hidden shadow-2xl">
-                             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-vts-petrol/20 to-transparent"></div>
+                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-vts-petrol/20 to-transparent"></div>
                             <h3 className="text-2xl font-bold mb-3 relative z-10">Transforme este diagnóstico em economia real</h3>
                             <p className="text-slate-300 mb-8 max-w-lg mx-auto relative z-10">
                                 Nossos engenheiros especialistas em Grupo A estão prontos para validar estes dados e propor a melhor solução de Mercado Livre ou Geração Própria.
                             </p>
-                            
-                            <button 
+
+                            <button
                                 onClick={handleConsultancyRequest}
-                                className="relative z-10 bg-[#25D366] hover:bg-[#128C7E] text-white px-10 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-3 mx-auto transform hover:-translate-y-1"
+                                disabled={isSavingLead}
+                                className="relative z-10 bg-[#25D366] hover:bg-[#128C7E] text-white px-10 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-3 mx-auto transform hover:-translate-y-1 disabled:opacity-70"
                             >
-                                <MessageCircle size={24} fill="white" />
-                                Solicitar Consultoria Gratuita
+                                {isSavingLead ? (
+                                    <Loader2 className="animate-spin" size={24} />
+                                ) : (
+                                    <>
+                                        <MessageCircle size={24} fill="white" />
+                                        Solicitar Consultoria Gratuita
+                                    </>
+                                )}
                             </button>
                             <p className="text-xs text-slate-500 mt-4 relative z-10">Fale diretamente com nossa engenharia via WhatsApp</p>
                         </div>

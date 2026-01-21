@@ -14,14 +14,13 @@ import {
   ChevronRight,
   Globe
 } from 'lucide-react';
-import FloatingChat from './FloatingChat';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  const isDarkPage = location.pathname === '/' || location.pathname === '/app' || location.pathname === '/login' || location.pathname === '/register';
+  const isDarkPage = location.pathname === '/' || location.pathname === '/app';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,8 +32,6 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Diferenciais', path: '/#diferenciais' },
-    { name: 'Benefícios', path: '/#beneficios' },
     { name: 'Sobre', path: '/about' },
     { name: 'Serviços', path: '/services' },
     { name: 'Blog', path: '/blog' },
@@ -235,7 +232,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     <div className="flex flex-col min-h-screen font-sans bg-slate-50 text-slate-900 overflow-x-hidden">
       <Navbar />
       <main className="flex-grow">{children}</main>
-      <FloatingChat />
       <Footer />
     </div>
   );

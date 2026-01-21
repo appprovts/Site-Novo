@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, FileText, ArrowRight, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../services/supabase';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -69,11 +70,11 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'cnpj') {
       const formatted = formatCNPJ(value);
       setFormData(prev => ({ ...prev, [name]: formatted }));
-      
+
       // Limpa erro se estiver corrigindo
       if (errors.cnpj) setErrors(prev => ({ ...prev, cnpj: '' }));
     } else {
@@ -84,10 +85,10 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     // Validações
     const newErrors: Record<string, string> = {};
-    
+
     if (!validateCNPJ(formData.cnpj)) {
       newErrors.cnpj = 'CNPJ inválido. Verifique os números digitados.';
     }
@@ -105,13 +106,29 @@ const Register: React.FC = () => {
       return;
     }
 
-    // Simulação de Envio
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            cnpj: formData.cnpj,
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       setSuccess(true);
-      // Aqui você integraria com o backend
-    }, 1500);
+    } catch (err: any) {
+      setErrors({ form: err.message || 'Erro ao realizar cadastro.' });
+      setIsSubmitting(false);
+    }
   };
 
   if (success) {
@@ -151,7 +168,7 @@ const Register: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              
+
               {/* Nome */}
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Razão Social ou Nome</label>
@@ -261,7 +278,7 @@ const Register: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         <p className="text-center text-slate-500 text-xs mt-6">
           Ao se cadastrar, você concorda com os Termos de Uso e Política de Privacidade da VTS Engenharia.
         </p>
