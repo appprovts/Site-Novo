@@ -37,7 +37,7 @@ const Services: React.FC = () => {
       icon: Unplug,
       title: "Grid Zero",
       desc: "Sistemas de injeção zero na rede elétrica. Gere sua própria energia para consumo instantâneo sem necessidade de homologação complexa ou taxas de fio B.",
-      tags: ["Sem Homologação", "Autoconsumo", "Zero Export"],
+      tags: ["Homologação", "Autoconsumo", "Zero Export"],
       link: "/contact"
     },
     {
